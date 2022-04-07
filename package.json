@@ -34,6 +34,7 @@
   },
   "dependencies": {
     "chalk": "^4.1.2",
+    "enquirer": "^2.3.6",
     "sade": "^1.8.1",
     "shelljs": "^0.8.5"
   }

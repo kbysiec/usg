@@ -7,8 +7,8 @@ prog.version("0.0.0");
 prog
   .command("create")
   .describe("Create action")
-  .action(() => {
-    create();
+  .action(async () => {
+    await create();
   });
 
 prog.parse(process.argv);
