@@ -1,9 +1,20 @@
 import chalk from "chalk";
+import enquirer from "enquirer";
 import { create } from "../src/commands";
 
 describe("commands", () => {
+  let logSpy: jest.SpyInstance;
+  let promptSpy: jest.SpyInstance;
+
   describe("create", () => {
-    it("should print logo", () => {
+    beforeEach(() => {
+      logSpy = jest.spyOn(console, "log").mockImplementation();
+      promptSpy = jest.spyOn(enquirer, "prompt");
+    });
+    afterEach(() => {
+      jest.restoreAllMocks();
+    });
+    it("should print logo", async () => {
       const logo = chalk.blue(`
     ##     ##  ######   ######
     ##     ## ##    ## ##    ##
@@ -13,12 +24,11 @@ describe("commands", () => {
     ##     ## ##    ## ##    ##
      #######   ######   ######
   `);
-      const logSpy = jest.spyOn(console, "log").mockImplementation();
-      create();
-      expect(logSpy).toHaveBeenCalledTimes(1);
-      expect(logSpy).toHaveBeenCalledWith(logo);
+      logSpy.mockImplementation();
+      promptSpy.mockResolvedValue({ projectName: "test-project-name" });
 
-      logSpy.mockRestore();
+      await create();
+      expect(logSpy).nthCalledWith(1, logo);
     });
   });
 });
