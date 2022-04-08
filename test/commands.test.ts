@@ -5,6 +5,14 @@ import path from "path";
 import shell from "shelljs";
 import { create } from "../src/commands";
 
+jest.mock("ora", () => {
+  return jest.fn().mockReturnValue({
+    start: jest.fn(),
+    succeed: jest.fn(),
+    fail: jest.fn(),
+  });
+});
+
 describe("commands", () => {
   let logSpy: jest.SpyInstance;
   let promptSpy: jest.SpyInstance;
@@ -21,6 +29,10 @@ describe("commands", () => {
     afterEach(() => {
       jest.restoreAllMocks();
     });
+    afterAll(() => {
+      jest.unmock("ora");
+    });
+
     it("should print logo", async () => {
       const logo = chalk.blue(`
     ##     ##  ######   ######

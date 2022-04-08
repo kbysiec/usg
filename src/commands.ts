@@ -1,8 +1,11 @@
 import chalk from "chalk";
 import enquirer from "enquirer";
 import fs from "fs-extra";
+import ora from "ora";
 import path from "path";
 import shell from "shelljs";
+
+const spinner = ora({ color: "gray" });
 
 interface Template {
   name: string;
@@ -58,7 +61,7 @@ async function getTemplateName(templates: Template[]) {
 
 function getTemplateChoices(templates: Template[]) {
   return templates.map((template) => ({
-    name: `\n* ${template.name}`,
+    name: `* ${template.name}`,
     value: template.name,
     hint: `${chalk.blue(`- ${template.description}`)}\n(${chalk.grey(
       template.url
@@ -83,12 +86,12 @@ async function cloneRepository(
   chosenTemplateName: string,
   chosenTemplatePath: string
 ) {
-  console.log(
+  spinner.start(
     `Cloning ${chalk.cyan(chosenTemplateName)} from ${chosenTemplatePath}...`
   );
   const command = `git clone ${chosenTemplatePath} ${projectPath}`;
   await execShellCommand(command);
-  console.log(`Template ${chalk.cyan(chosenTemplateName)} cloned`);
+  spinner.succeed(`Template ${chalk.cyan(chosenTemplateName)} cloned`);
 }
 
 export async function create() {
@@ -101,6 +104,5 @@ export async function create() {
   const template = templates.find((t) => t.name === templateName);
   if (template) {
     await cloneRepository(projectPath, templateName, template.url);
-    console.log("project cloned");
   }
 }
