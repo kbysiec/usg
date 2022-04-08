@@ -17,6 +17,7 @@ describe("commands", () => {
   let logSpy: jest.SpyInstance;
   let promptSpy: jest.SpyInstance;
   let readJSONSyncSpy: jest.SpyInstance;
+  let writeJSONSyncSpy: jest.SpyInstance;
   let execSpy: jest.SpyInstance;
 
   describe("create", () => {
@@ -24,6 +25,7 @@ describe("commands", () => {
       logSpy = jest.spyOn(console, "log");
       promptSpy = jest.spyOn(enquirer, "prompt");
       readJSONSyncSpy = jest.spyOn(fs, "readJSONSync");
+      writeJSONSyncSpy = jest.spyOn(fs, "writeJSONSync").mockImplementation();
       execSpy = jest.spyOn(shell, "exec");
     });
     afterEach(() => {
@@ -91,6 +93,35 @@ describe("commands", () => {
       readJSONSyncSpy.mockReturnValue([template]);
 
       expect(create()).rejects.toBe(errorMessage);
+    });
+
+    it("should update template package.json name property to project name", async () => {
+      const template = {
+        name: "test-template-1",
+        url: "https://test-template-1-url.testDomain",
+        description: "This is template entry only for testing purposes",
+      };
+      const projectName = "test-project-name";
+      const projectPath = path.join(process.cwd(), projectName);
+      const packageJsonPath = path.join(projectPath, "package.json");
+      logSpy.mockImplementation();
+      execSpy.mockImplementation((_comm, _opts, callback) => callback(0));
+      promptSpy
+        .mockResolvedValueOnce({ projectName })
+        .mockResolvedValueOnce({ templateName: template.name });
+      readJSONSyncSpy
+        .mockReturnValueOnce([template])
+        .mockReturnValue({ name: "old-name" });
+
+      await create();
+
+      expect(writeJSONSyncSpy).toHaveBeenCalledWith(
+        packageJsonPath,
+        {
+          name: projectName,
+        },
+        { spaces: 2 }
+      );
     });
   });
 });

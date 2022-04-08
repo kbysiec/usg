@@ -13,6 +13,10 @@ interface Template {
   description: string;
 }
 
+interface PackageJson {
+  name: string;
+}
+
 function readTemplates() {
   const filePath = path.join(process.cwd(), "templates.json");
   const templates: Template[] = fs.readJSONSync(filePath);
@@ -94,6 +98,24 @@ async function cloneRepository(
   spinner.succeed(`Template ${chalk.cyan(chosenTemplateName)} cloned`);
 }
 
+function getPackageJsonNewName(projectName: string) {
+  return projectName.substring(projectName.lastIndexOf("/") + 1);
+}
+
+function updateProjectPackageJsonNamed(
+  projectPath: string,
+  projectName: string
+) {
+  spinner.start("Updating package.json name...");
+  const name = getPackageJsonNewName(projectName);
+  const filePath = path.join(projectPath, "package.json");
+  const packageJson: PackageJson = fs.readJSONSync(filePath);
+  packageJson.name = name;
+
+  fs.writeJSONSync(filePath, packageJson, { spaces: 2 });
+  spinner.succeed(`Package.json name property updated`);
+}
+
 export async function create() {
   const templates = readTemplates();
 
@@ -104,5 +126,6 @@ export async function create() {
   const template = templates.find((t) => t.name === templateName);
   if (template) {
     await cloneRepository(projectPath, templateName, template.url);
+    updateProjectPackageJsonNamed(projectPath, projectName);
   }
 }
