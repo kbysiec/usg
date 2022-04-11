@@ -14,13 +14,19 @@ jest.mock("ora", () => {
 });
 
 describe("commands", () => {
-  let logSpy: jest.SpyInstance;
-  let promptSpy: jest.SpyInstance;
-  let readJSONSyncSpy: jest.SpyInstance;
-  let writeJSONSyncSpy: jest.SpyInstance;
-  let execSpy: jest.SpyInstance;
-
   describe("create", () => {
+    let logSpy: jest.SpyInstance;
+    let promptSpy: jest.SpyInstance;
+    let readJSONSyncSpy: jest.SpyInstance;
+    let writeJSONSyncSpy: jest.SpyInstance;
+    let execSpy: jest.SpyInstance;
+    const template = {
+      name: "test-template-1",
+      url: "https://test-template-1-url.testDomain",
+      description: "This is template entry only for testing purposes",
+    };
+    const projectName = "test-project-name";
+
     beforeEach(() => {
       logSpy = jest.spyOn(console, "log");
       promptSpy = jest.spyOn(enquirer, "prompt");
@@ -54,12 +60,6 @@ describe("commands", () => {
     });
 
     it("should clone successfylly the chosen template", async () => {
-      const template = {
-        name: "test-template-1",
-        url: "https://test-template-1-url.testDomain",
-        description: "This is template entry only for testing purposes",
-      };
-      const projectName = "test-project-name";
       const projectPath = path.join(process.cwd(), projectName);
       logSpy.mockImplementation();
       execSpy.mockImplementation((_comm, _opts, callback) => callback(0));
@@ -77,12 +77,6 @@ describe("commands", () => {
 
     it("should error be thrown if cloning the chosen template was broken", () => {
       const errorMessage = "test error";
-      const template = {
-        name: "test-template-1",
-        url: "https://test-template-1-url.testDomain",
-        description: "This is template entry only for testing purposes",
-      };
-      const projectName = "test-project-name";
       logSpy.mockImplementation();
       execSpy.mockImplementation((_comm, _opts, callback) =>
         callback(1, null, errorMessage)
@@ -96,12 +90,6 @@ describe("commands", () => {
     });
 
     it("should update template package.json name property to project name", async () => {
-      const template = {
-        name: "test-template-1",
-        url: "https://test-template-1-url.testDomain",
-        description: "This is template entry only for testing purposes",
-      };
-      const projectName = "test-project-name";
       const projectPath = path.join(process.cwd(), projectName);
       const packageJsonPath = path.join(projectPath, "package.json");
       logSpy.mockImplementation();
