@@ -58,7 +58,7 @@ describe("commands", () => {
       promptSpy.mockResolvedValue({ projectName: "test-project-name" });
       readJSONSyncSpy.mockReturnValue([]);
 
-      await create(false);
+      await create(false, false);
       expect(logSpy).nthCalledWith(1, logo);
     });
 
@@ -71,7 +71,7 @@ describe("commands", () => {
         .mockResolvedValueOnce({ templateName: template.name });
       readJSONSyncSpy.mockReturnValue([template]);
 
-      await create(false);
+      await create(false, false);
 
       expect(execSpy.mock.calls[0][0]).toEqual(
         `git clone ${template.url} ${projectPath}`
@@ -89,7 +89,7 @@ describe("commands", () => {
         .mockResolvedValueOnce({ templateName: template.name });
       readJSONSyncSpy.mockReturnValue([template]);
 
-      expect(create(false)).rejects.toBe(errorMessage);
+      expect(create(false, false)).rejects.toBe(errorMessage);
     });
 
     it("should update template package.json name property to project name", async () => {
@@ -104,7 +104,7 @@ describe("commands", () => {
         .mockReturnValueOnce([template])
         .mockReturnValue({ name: "old-name" });
 
-      await create(false);
+      await create(false, false);
 
       expect(writeJSONSyncSpy).toHaveBeenCalledWith(
         packageJsonPath,
@@ -129,11 +129,27 @@ describe("commands", () => {
         peerDependencies: { test: "0.0.0" },
       });
 
-      await create(true);
+      await create(true, false);
 
       expect(execSpy.mock.calls[1][0]).toEqual(
         `cd ${projectPath} && npm install`
       );
+    });
+
+    it("should reinitialize git repository if shouldReinitializeGit is true", async () => {
+      const projectPath = path.join(process.cwd(), projectName);
+      logSpy.mockImplementation();
+      execSpy.mockImplementation((_comm, _opts, callback) => callback(0));
+      promptSpy
+        .mockResolvedValueOnce({ projectName })
+        .mockResolvedValueOnce({ templateName: template.name });
+      readJSONSyncSpy.mockReturnValueOnce([template]).mockReturnValue({
+        name: "old-name",
+      });
+
+      await create(false, true);
+
+      expect(execSpy.mock.calls[1][0]).toEqual(`cd ${projectPath} && git init`);
     });
   });
 

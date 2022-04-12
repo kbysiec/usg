@@ -182,7 +182,23 @@ async function installDependencies(projectPath: string) {
   }
 }
 
-export async function create(shouldAutoInstallDependencies: boolean) {
+async function reinitializeGit(projectPath: string) {
+  spinner.start(`Reinitializing git repository...`);
+
+  await fs.promises.rm(path.resolve(__dirname, projectPath, ".git"), {
+    force: true,
+    recursive: true,
+  });
+
+  const command = `cd ${projectPath} && git init`;
+  await execShellCommand(command);
+  spinner.succeed(`Git reinitialized`);
+}
+
+export async function create(
+  shouldAutoInstallDependencies: boolean,
+  shouldReinitializeGit: boolean
+) {
   const templates = readTemplates();
 
   printTitle();
@@ -194,5 +210,6 @@ export async function create(shouldAutoInstallDependencies: boolean) {
     await cloneRepository(projectPath, templateName, template.url);
     updateProjectPackageJsonNamed(projectPath, projectName);
     shouldAutoInstallDependencies && (await installDependencies(projectPath));
+    shouldReinitializeGit && (await reinitializeGit(projectPath));
   }
 }

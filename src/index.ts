@@ -12,8 +12,9 @@ prog
     "Should install automatically npm dependencies",
     true
   )
+  .option("-r, --reinitialize-git", "Should reinitialize git repository", true)
   .action(async (opts) => {
-    await create(opts["auto-install"]);
+    await create(opts["auto-install"], opts["reinitialize-git"]);
   });
 
 prog.parse(process.argv);
