@@ -3,7 +3,11 @@ import enquirer from "enquirer";
 import fs from "fs-extra";
 import path from "path";
 import shell from "shelljs";
-import { create } from "../src/commands";
+import {
+  create,
+  getInstallDependenciesMessage,
+  PackageJson,
+} from "../src/commands";
 
 jest.mock("ora", () => {
   return jest.fn().mockReturnValue({
@@ -14,19 +18,18 @@ jest.mock("ora", () => {
 });
 
 describe("commands", () => {
+  let logSpy: jest.SpyInstance;
+  let promptSpy: jest.SpyInstance;
+  let readJSONSyncSpy: jest.SpyInstance;
+  let writeJSONSyncSpy: jest.SpyInstance;
+  let execSpy: jest.SpyInstance;
+  const template = {
+    name: "test-template-1",
+    url: "https://test-template-1-url.testDomain",
+    description: "This is template entry only for testing purposes",
+  };
+  const projectName = "test-project-name";
   describe("create", () => {
-    let logSpy: jest.SpyInstance;
-    let promptSpy: jest.SpyInstance;
-    let readJSONSyncSpy: jest.SpyInstance;
-    let writeJSONSyncSpy: jest.SpyInstance;
-    let execSpy: jest.SpyInstance;
-    const template = {
-      name: "test-template-1",
-      url: "https://test-template-1-url.testDomain",
-      description: "This is template entry only for testing purposes",
-    };
-    const projectName = "test-project-name";
-
     beforeEach(() => {
       logSpy = jest.spyOn(console, "log");
       promptSpy = jest.spyOn(enquirer, "prompt");
@@ -55,7 +58,7 @@ describe("commands", () => {
       promptSpy.mockResolvedValue({ projectName: "test-project-name" });
       readJSONSyncSpy.mockReturnValue([]);
 
-      await create();
+      await create(false);
       expect(logSpy).nthCalledWith(1, logo);
     });
 
@@ -68,7 +71,7 @@ describe("commands", () => {
         .mockResolvedValueOnce({ templateName: template.name });
       readJSONSyncSpy.mockReturnValue([template]);
 
-      await create();
+      await create(false);
 
       expect(execSpy.mock.calls[0][0]).toEqual(
         `git clone ${template.url} ${projectPath}`
@@ -86,7 +89,7 @@ describe("commands", () => {
         .mockResolvedValueOnce({ templateName: template.name });
       readJSONSyncSpy.mockReturnValue([template]);
 
-      expect(create()).rejects.toBe(errorMessage);
+      expect(create(false)).rejects.toBe(errorMessage);
     });
 
     it("should update template package.json name property to project name", async () => {
@@ -101,7 +104,7 @@ describe("commands", () => {
         .mockReturnValueOnce([template])
         .mockReturnValue({ name: "old-name" });
 
-      await create();
+      await create(false);
 
       expect(writeJSONSyncSpy).toHaveBeenCalledWith(
         packageJsonPath,
@@ -109,6 +112,80 @@ describe("commands", () => {
           name: projectName,
         },
         { spaces: 2 }
+      );
+    });
+
+    it("should install npm dependencies if shouldAutoInstallDependencies is true", async () => {
+      const projectPath = path.join(process.cwd(), projectName);
+      logSpy.mockImplementation();
+      execSpy.mockImplementation((_comm, _opts, callback) => callback(0));
+      promptSpy
+        .mockResolvedValueOnce({ projectName })
+        .mockResolvedValueOnce({ templateName: template.name });
+      readJSONSyncSpy.mockReturnValueOnce([template]).mockReturnValue({
+        name: "old-name",
+        dependencies: { test: "0.0.0" },
+        devDependencies: { test: "0.0.0" },
+        peerDependencies: { test: "0.0.0" },
+      });
+
+      await create(true);
+
+      expect(execSpy.mock.calls[1][0]).toEqual(
+        `cd ${projectPath} && npm install`
+      );
+    });
+  });
+
+  describe("getInstallDependenciesMessage", () => {
+    it("should return no packages to install if there is not any dependency", async () => {
+      const packageJson = {
+        name: "old-name",
+        dependencies: {},
+        devDependencies: {},
+        peerDependencies: {},
+      };
+
+      expect(getInstallDependenciesMessage(packageJson)).toEqual(
+        "There are no packages to install"
+      );
+    });
+
+    it("should return message with listed dependencies to install", async () => {
+      let packageJson: PackageJson = {
+        dependencies: { test: "0.0.0", test2: "0.0.0", test3: "0.0.0" },
+      };
+
+      expect(
+        getInstallDependenciesMessage(packageJson).replace(/\s/g, "")
+      ).toEqual(
+        `Installing npm packages... dependencies: ${chalk.cyan(
+          "test\n test2\n test3"
+        )}`.replace(/\s/g, "")
+      );
+
+      packageJson = {
+        devDependencies: { test: "0.0.0" },
+      };
+
+      expect(
+        getInstallDependenciesMessage(packageJson).replace(/\s/g, "")
+      ).toEqual(
+        `Installing npm packages... devDependencies: ${chalk.cyan(
+          "test"
+        )}`.replace(/\s/g, "")
+      );
+
+      packageJson = {
+        peerDependencies: { test: "0.0.0" },
+      };
+
+      expect(
+        getInstallDependenciesMessage(packageJson).replace(/\s/g, "")
+      ).toEqual(
+        `Installing npm packages... peerDependencies: ${chalk.cyan(
+          "test"
+        )}`.replace(/\s/g, "")
       );
     });
   });

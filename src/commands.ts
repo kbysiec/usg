@@ -13,8 +13,11 @@ interface Template {
   description: string;
 }
 
-interface PackageJson {
-  name: string;
+export interface PackageJson {
+  name?: string;
+  dependencies?: { [key: string]: string };
+  devDependencies?: { [key: string]: string };
+  peerDependencies?: { [key: string]: string };
 }
 
 function readTemplates() {
@@ -116,7 +119,70 @@ function updateProjectPackageJsonNamed(
   spinner.succeed(`Package.json name property updated`);
 }
 
-export async function create() {
+function readDependenciesFromClonedTemplate(projectPath: string) {
+  const filePath = path.join(projectPath, "package.json");
+  const packageJson: PackageJson = fs.readJSONSync(filePath);
+  const { dependencies, devDependencies, peerDependencies } = packageJson;
+  return {
+    dependencies,
+    devDependencies,
+    peerDependencies,
+  } as PackageJson;
+}
+
+function isAnyDependency(packageJson: PackageJson) {
+  const dependencies = [
+    packageJson.dependencies,
+    packageJson.devDependencies,
+    packageJson.peerDependencies,
+  ];
+  return dependencies.some(
+    (dep: { [key: string]: string } | undefined) =>
+      dep && Object.keys(dep).length > 0
+  );
+}
+
+export function getInstallDependenciesMessage(packageJson: PackageJson) {
+  const message = `${
+    isAnyDependency(packageJson)
+      ? `Installing npm packages...\n${
+          packageJson.dependencies
+            ? `\n  dependencies:\n    ${chalk.cyan(
+                Object.keys(packageJson.dependencies).join("\n    ")
+              )}\n    `
+            : ""
+        }${
+          packageJson.devDependencies
+            ? `\n  devDependencies:\n    ${chalk.cyan(
+                Object.keys(packageJson.devDependencies).join("\n    ")
+              )}\n    `
+            : ""
+        }${
+          packageJson.peerDependencies
+            ? `\n  peerDependencies:\n    ${chalk.cyan(
+                Object.keys(packageJson.peerDependencies).join("\n    ")
+              )}\n    `
+            : ""
+        }`
+      : "There are no packages to install"
+  }`;
+
+  return message;
+}
+
+async function installDependencies(projectPath: string) {
+  const packageJson: PackageJson =
+    readDependenciesFromClonedTemplate(projectPath);
+  if (isAnyDependency(packageJson)) {
+    spinner.start(getInstallDependenciesMessage(packageJson));
+
+    const command = `cd ${projectPath} && npm install`;
+    await execShellCommand(command);
+    spinner.succeed(`Npm packages installed`);
+  }
+}
+
+export async function create(shouldAutoInstallDependencies: boolean) {
   const templates = readTemplates();
 
   printTitle();
@@ -127,5 +193,6 @@ export async function create() {
   if (template) {
     await cloneRepository(projectPath, templateName, template.url);
     updateProjectPackageJsonNamed(projectPath, projectName);
+    shouldAutoInstallDependencies && (await installDependencies(projectPath));
   }
 }

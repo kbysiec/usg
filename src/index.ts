@@ -7,8 +7,13 @@ prog.version("0.0.0");
 prog
   .command("create")
   .describe("Create action")
-  .action(async () => {
-    await create();
+  .option(
+    "-a, --auto-install",
+    "Should install automatically npm dependencies",
+    true
+  )
+  .action(async (opts) => {
+    await create(opts["auto-install"]);
   });
 
 prog.parse(process.argv);
