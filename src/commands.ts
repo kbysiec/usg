@@ -67,6 +67,10 @@ async function getTemplateName(templates: Template[]) {
   return templateName;
 }
 
+function findTemplate(templates: Template[], templateName: string) {
+  return templates.find((t) => t.name === templateName);
+}
+
 function getTemplateChoices(templates: Template[]) {
   return templates.map((template) => ({
     name: `* ${template.name}`,
@@ -221,7 +225,7 @@ export async function create(
   const projectName = await getProjectName();
   const projectPath = getNormalizedProjectPath(projectName);
   const templateName = await getTemplateName(templates);
-  const template = templates.find((t) => t.name === templateName);
+  const template = findTemplate(templates, templateName);
   if (template) {
     await cloneRepository(projectPath, templateName, template.url);
     updateProjectPackageJsonNamed(projectPath, projectName);

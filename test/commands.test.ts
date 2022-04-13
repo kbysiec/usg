@@ -10,19 +10,18 @@ import {
   PackageJson,
 } from "../src/commands";
 
-jest.mock("ora", () => {
-  return jest.fn().mockReturnValue({
+jest.mock("ora", () =>
+  jest.fn().mockReturnValue({
     start: jest.fn(),
     succeed: jest.fn(),
     fail: jest.fn(),
-  });
-});
+  })
+);
 
 jest.mock("tree-node-cli");
 
 describe("commands", () => {
   let logSpy: jest.SpyInstance;
-  let promptSpy: jest.SpyInstance;
   let readJSONSyncSpy: jest.SpyInstance;
   let writeJSONSyncSpy: jest.SpyInstance;
   let execSpy: jest.SpyInstance;
@@ -32,12 +31,17 @@ describe("commands", () => {
     description: "This is template entry only for testing purposes",
   };
   const projectName = "test-project-name";
+  const projectPath = path.join(process.cwd(), projectName);
+
   describe("create", () => {
     beforeEach(() => {
-      logSpy = jest.spyOn(console, "log");
-      promptSpy = jest.spyOn(enquirer, "prompt");
+      logSpy = jest.spyOn(console, "log").mockImplementation();
       readJSONSyncSpy = jest.spyOn(fs, "readJSONSync");
       writeJSONSyncSpy = jest.spyOn(fs, "writeJSONSync").mockImplementation();
+      jest
+        .spyOn(enquirer, "prompt")
+        .mockResolvedValueOnce({ projectName })
+        .mockResolvedValueOnce({ templateName: template.name });
       execSpy = jest.spyOn(shell, "exec");
       (tree as jest.Mock).mockClear();
     });
@@ -59,8 +63,6 @@ describe("commands", () => {
     ##     ## ##    ## ##    ##
      #######   ######   ######
   `);
-      logSpy.mockImplementation();
-      promptSpy.mockResolvedValue({ projectName: "test-project-name" });
       readJSONSyncSpy.mockReturnValue([]);
 
       await create(false, false);
@@ -68,12 +70,7 @@ describe("commands", () => {
     });
 
     it("should clone successfylly the chosen template", async () => {
-      const projectPath = path.join(process.cwd(), projectName);
-      logSpy.mockImplementation();
       execSpy.mockImplementation((_comm, _opts, callback) => callback(0));
-      promptSpy
-        .mockResolvedValueOnce({ projectName })
-        .mockResolvedValueOnce({ templateName: template.name });
       readJSONSyncSpy.mockReturnValue([template]);
 
       await create(false, false);
@@ -85,26 +82,17 @@ describe("commands", () => {
 
     it("should error be thrown if cloning the chosen template was broken", () => {
       const errorMessage = "test error";
-      logSpy.mockImplementation();
       execSpy.mockImplementation((_comm, _opts, callback) =>
         callback(1, null, errorMessage)
       );
-      promptSpy
-        .mockResolvedValueOnce({ projectName })
-        .mockResolvedValueOnce({ templateName: template.name });
       readJSONSyncSpy.mockReturnValue([template]);
 
       expect(create(false, false)).rejects.toBe(errorMessage);
     });
 
     it("should update template package.json name property to project name", async () => {
-      const projectPath = path.join(process.cwd(), projectName);
       const packageJsonPath = path.join(projectPath, "package.json");
-      logSpy.mockImplementation();
       execSpy.mockImplementation((_comm, _opts, callback) => callback(0));
-      promptSpy
-        .mockResolvedValueOnce({ projectName })
-        .mockResolvedValueOnce({ templateName: template.name });
       readJSONSyncSpy
         .mockReturnValueOnce([template])
         .mockReturnValue({ name: "old-name" });
@@ -121,12 +109,7 @@ describe("commands", () => {
     });
 
     it("should install npm dependencies if shouldAutoInstallDependencies is true", async () => {
-      const projectPath = path.join(process.cwd(), projectName);
-      logSpy.mockImplementation();
       execSpy.mockImplementation((_comm, _opts, callback) => callback(0));
-      promptSpy
-        .mockResolvedValueOnce({ projectName })
-        .mockResolvedValueOnce({ templateName: template.name });
       readJSONSyncSpy.mockReturnValueOnce([template]).mockReturnValue({
         name: "old-name",
         dependencies: { test: "0.0.0" },
@@ -142,12 +125,7 @@ describe("commands", () => {
     });
 
     it("should reinitialize git repository if shouldReinitializeGit is true", async () => {
-      const projectPath = path.join(process.cwd(), projectName);
-      logSpy.mockImplementation();
       execSpy.mockImplementation((_comm, _opts, callback) => callback(0));
-      promptSpy
-        .mockResolvedValueOnce({ projectName })
-        .mockResolvedValueOnce({ templateName: template.name });
       readJSONSyncSpy.mockReturnValueOnce([template]).mockReturnValue({
         name: "old-name",
       });
@@ -158,11 +136,7 @@ describe("commands", () => {
     });
 
     it("should print folder structure for copied template", async () => {
-      logSpy.mockImplementation();
       execSpy.mockImplementation((_comm, _opts, callback) => callback(0));
-      promptSpy
-        .mockResolvedValueOnce({ projectName })
-        .mockResolvedValueOnce({ templateName: template.name });
       readJSONSyncSpy.mockReturnValueOnce([template]).mockReturnValue({
         name: "old-name",
       });
