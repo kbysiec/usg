@@ -3,6 +3,7 @@ import enquirer from "enquirer";
 import fs from "fs-extra";
 import path from "path";
 import shell from "shelljs";
+import tree from "tree-node-cli";
 import {
   create,
   getInstallDependenciesMessage,
@@ -16,6 +17,8 @@ jest.mock("ora", () => {
     fail: jest.fn(),
   });
 });
+
+jest.mock("tree-node-cli");
 
 describe("commands", () => {
   let logSpy: jest.SpyInstance;
@@ -36,12 +39,14 @@ describe("commands", () => {
       readJSONSyncSpy = jest.spyOn(fs, "readJSONSync");
       writeJSONSyncSpy = jest.spyOn(fs, "writeJSONSync").mockImplementation();
       execSpy = jest.spyOn(shell, "exec");
+      (tree as jest.Mock).mockClear();
     });
     afterEach(() => {
       jest.restoreAllMocks();
     });
     afterAll(() => {
       jest.unmock("ora");
+      jest.unmock("tree-node-cli");
     });
 
     it("should print logo", async () => {
@@ -150,6 +155,23 @@ describe("commands", () => {
       await create(false, true);
 
       expect(execSpy.mock.calls[1][0]).toEqual(`cd ${projectPath} && git init`);
+    });
+
+    it("should print folder structure for copied template", async () => {
+      logSpy.mockImplementation();
+      execSpy.mockImplementation((_comm, _opts, callback) => callback(0));
+      promptSpy
+        .mockResolvedValueOnce({ projectName })
+        .mockResolvedValueOnce({ templateName: template.name });
+      readJSONSyncSpy.mockReturnValueOnce([template]).mockReturnValue({
+        name: "old-name",
+      });
+      const testStructure = "test structure";
+      (tree as jest.Mock).mockReturnValue(testStructure);
+
+      await create(false, false);
+
+      expect(logSpy.mock.calls[2][0]).toEqual(testStructure);
     });
   });
 

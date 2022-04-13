@@ -4,6 +4,7 @@ import fs from "fs-extra";
 import ora from "ora";
 import path from "path";
 import shell from "shelljs";
+import tree from "tree-node-cli";
 
 const spinner = ora({ color: "gray" });
 
@@ -142,6 +143,46 @@ function isAnyDependency(packageJson: PackageJson) {
   );
 }
 
+async function installDependencies(projectPath: string) {
+  const packageJson: PackageJson =
+    readDependenciesFromClonedTemplate(projectPath);
+  if (isAnyDependency(packageJson)) {
+    spinner.start(getInstallDependenciesMessage(packageJson));
+
+    const command = `cd ${projectPath} && npm install`;
+    await execShellCommand(command);
+    spinner.succeed(`Npm packages installed`);
+  }
+}
+
+async function reinitializeGit(projectPath: string) {
+  spinner.start(`Reinitializing git repository...`);
+
+  await fs.promises.rm(path.resolve(__dirname, projectPath, ".git"), {
+    force: true,
+    recursive: true,
+  });
+
+  const command = `cd ${projectPath} && git init`;
+  await execShellCommand(command);
+  spinner.succeed(`Git reinitialized`);
+}
+
+function getProjectStructure(projectPath: string) {
+  const structure = tree(projectPath, {
+    maxDepth: 1,
+    sizes: true,
+  });
+
+  return structure;
+}
+
+function printProjectStructure(projectPath: string) {
+  const structure = getProjectStructure(projectPath);
+  console.log(chalk.blue("Project structure:\n"));
+  console.log(structure);
+}
+
 export function getInstallDependenciesMessage(packageJson: PackageJson) {
   const message = `${
     isAnyDependency(packageJson)
@@ -170,31 +211,6 @@ export function getInstallDependenciesMessage(packageJson: PackageJson) {
   return message;
 }
 
-async function installDependencies(projectPath: string) {
-  const packageJson: PackageJson =
-    readDependenciesFromClonedTemplate(projectPath);
-  if (isAnyDependency(packageJson)) {
-    spinner.start(getInstallDependenciesMessage(packageJson));
-
-    const command = `cd ${projectPath} && npm install`;
-    await execShellCommand(command);
-    spinner.succeed(`Npm packages installed`);
-  }
-}
-
-async function reinitializeGit(projectPath: string) {
-  spinner.start(`Reinitializing git repository...`);
-
-  await fs.promises.rm(path.resolve(__dirname, projectPath, ".git"), {
-    force: true,
-    recursive: true,
-  });
-
-  const command = `cd ${projectPath} && git init`;
-  await execShellCommand(command);
-  spinner.succeed(`Git reinitialized`);
-}
-
 export async function create(
   shouldAutoInstallDependencies: boolean,
   shouldReinitializeGit: boolean
@@ -211,5 +227,6 @@ export async function create(
     updateProjectPackageJsonNamed(projectPath, projectName);
     shouldAutoInstallDependencies && (await installDependencies(projectPath));
     shouldReinitializeGit && (await reinitializeGit(projectPath));
+    printProjectStructure(projectPath);
   }
 }
