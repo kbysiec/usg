@@ -24,9 +24,9 @@ const messages = {
     emptyProject: () => "Project name is empty.\n  Operation cancelled",
     pathExists: () => "Target directory already exists.\n  Operation cancelled",
     templateDoesNotExist: () =>
-      "Chosen template doesn't exist. Choose another one.\n  Operation cancelled.",
+      "Chosen template doesn't exist. Choose another one.\n  Operation cancelled",
     templateDoesNotHaveUrl: () =>
-      "Chosen template doesn't have url. Choose another one.\n  Operation cancelled.",
+      "Chosen template doesn't have url. Choose another one.\n  Operation cancelled",
   },
 };
 

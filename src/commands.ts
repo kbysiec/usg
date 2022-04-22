@@ -147,22 +147,49 @@ function printProjectStructure(projectPath: string) {
   console.log(structure);
 }
 
+function ifProjectPathAlreadyExists(projectPath: string) {
+  return fs.pathExistsSync(projectPath);
+}
+
 export async function create(
   shouldAutoInstallDependencies: boolean,
   shouldReinitializeGit: boolean
 ) {
-  const templates = readTemplates();
+  try {
+    const templates = readTemplates();
 
-  print.title();
-  const projectName = await getProjectName();
-  const projectPath = getNormalizedProjectPath(projectName);
-  const templateName = await getTemplateName(templates);
-  const template = findTemplate(templates, templateName);
-  if (template) {
+    print.title();
+    const projectName = await getProjectName();
+    if (!projectName) {
+      print.error.emptyProject();
+      return;
+    }
+    const projectPath = getNormalizedProjectPath(projectName);
+    const projectPathAlreadyExists = ifProjectPathAlreadyExists(projectPath);
+    if (projectPathAlreadyExists) {
+      print.error.pathExists();
+      return;
+    }
+    const templateName = await getTemplateName(templates);
+    const template = findTemplate(templates, templateName);
+    if (!template) {
+      print.error.templateDoesNotExist();
+      return;
+    }
+    if (!template.url) {
+      print.error.templateDoesNotHaveUrl();
+      return;
+    }
     await cloneRepository(projectPath, templateName, template.url);
     updateProjectPackageJsonName(projectPath, projectName);
     shouldAutoInstallDependencies && (await installDependencies(projectPath));
     shouldReinitializeGit && (await reinitializeGit(projectPath));
     printProjectStructure(projectPath);
+  } catch (err: unknown) {
+    if (err instanceof Error) {
+      print.error.any(err.stack);
+    } else {
+      print.error.operationCancelledByUser();
+    }
   }
 }
