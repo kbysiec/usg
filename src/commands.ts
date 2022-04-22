@@ -8,18 +8,7 @@ import tree from "tree-node-cli";
 
 const spinner = ora({ color: "gray" });
 
-interface Template {
-  name: string;
-  url: string;
-  description: string;
-}
-
-export interface PackageJson {
-  name?: string;
-  dependencies?: { [key: string]: string };
-  devDependencies?: { [key: string]: string };
-  peerDependencies?: { [key: string]: string };
-}
+import { PackageJson, Template } from "./types";
 
 function readTemplates() {
   const filePath = path.join(process.cwd(), "templates.json");

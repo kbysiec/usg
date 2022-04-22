@@ -4,11 +4,8 @@ import fs from "fs-extra";
 import path from "path";
 import shell from "shelljs";
 import tree from "tree-node-cli";
-import {
-  create,
-  getInstallDependenciesMessage,
-  PackageJson,
-} from "../src/commands";
+import { create, getInstallDependenciesMessage } from "../src/commands";
+import { PackageJson } from "../src/types";
 
 jest.mock("ora", () =>
   jest.fn().mockReturnValue({
