@@ -1,32 +1,17 @@
 import chalk from "chalk";
 import enquirer from "enquirer";
 import fs from "fs-extra";
-import ora from "ora";
 import path from "path";
 import shell from "shelljs";
 import tree from "tree-node-cli";
-
-const spinner = ora({ color: "gray" });
-
+import { print } from "./messages";
+import { isAnyDependency } from "./shared";
 import { PackageJson, Template } from "./types";
 
 function readTemplates() {
   const filePath = path.join(process.cwd(), "templates.json");
   const templates: Template[] = fs.readJSONSync(filePath);
   return templates;
-}
-
-function printTitle() {
-  const logo = `
-    ##     ##  ######   ######
-    ##     ## ##    ## ##    ##
-    ##     ## ##       ##
-    ##     ##  ######  ##   ####
-    ##     ##       ## ##    ##
-    ##     ## ##    ## ##    ##
-     #######   ######   ######
-  `;
-  console.log(chalk.blue(logo));
 }
 
 async function getProjectName() {
@@ -84,33 +69,31 @@ async function execShellCommand(command: string) {
 
 async function cloneRepository(
   projectPath: string,
-  chosenTemplateName: string,
-  chosenTemplatePath: string
+  templateName: string,
+  templatePath: string
 ) {
-  spinner.start(
-    `Cloning ${chalk.cyan(chosenTemplateName)} from ${chosenTemplatePath}...`
-  );
-  const command = `git clone ${chosenTemplatePath} ${projectPath}`;
+  print.start.cloningRepository(templateName, templatePath);
+  const command = `git clone ${templatePath} ${projectPath}`;
   await execShellCommand(command);
-  spinner.succeed(`Template ${chalk.cyan(chosenTemplateName)} cloned`);
+  print.end.cloningRepository(templateName);
 }
 
 function getPackageJsonNewName(projectName: string) {
   return projectName.substring(projectName.lastIndexOf("/") + 1);
 }
 
-function updateProjectPackageJsonNamed(
+function updateProjectPackageJsonName(
   projectPath: string,
   projectName: string
 ) {
-  spinner.start("Updating package.json name...");
+  print.start.updatingPackageJsonName();
   const name = getPackageJsonNewName(projectName);
   const filePath = path.join(projectPath, "package.json");
   const packageJson: PackageJson = fs.readJSONSync(filePath);
   packageJson.name = name;
 
   fs.writeJSONSync(filePath, packageJson, { spaces: 2 });
-  spinner.succeed(`Package.json name property updated`);
+  print.end.updatingPackageJsonName();
 }
 
 function readDependenciesFromClonedTemplate(projectPath: string) {
@@ -124,32 +107,20 @@ function readDependenciesFromClonedTemplate(projectPath: string) {
   } as PackageJson;
 }
 
-function isAnyDependency(packageJson: PackageJson) {
-  const dependencies = [
-    packageJson.dependencies,
-    packageJson.devDependencies,
-    packageJson.peerDependencies,
-  ];
-  return dependencies.some(
-    (dep: { [key: string]: string } | undefined) =>
-      dep && Object.keys(dep).length > 0
-  );
-}
-
 async function installDependencies(projectPath: string) {
   const packageJson: PackageJson =
     readDependenciesFromClonedTemplate(projectPath);
   if (isAnyDependency(packageJson)) {
-    spinner.start(getInstallDependenciesMessage(packageJson));
+    print.start.installingDependencies(packageJson);
 
     const command = `cd ${projectPath} && npm install`;
     await execShellCommand(command);
-    spinner.succeed(`Npm packages installed`);
+    print.end.installingDependencies();
   }
 }
 
 async function reinitializeGit(projectPath: string) {
-  spinner.start(`Reinitializing git repository...`);
+  print.start.reinitializingGit();
 
   await fs.promises.rm(path.resolve(__dirname, projectPath, ".git"), {
     force: true,
@@ -158,7 +129,7 @@ async function reinitializeGit(projectPath: string) {
 
   const command = `cd ${projectPath} && git init`;
   await execShellCommand(command);
-  spinner.succeed(`Git reinitialized`);
+  print.end.reinitializingGit();
 }
 
 function getProjectStructure(projectPath: string) {
@@ -176,48 +147,20 @@ function printProjectStructure(projectPath: string) {
   console.log(structure);
 }
 
-export function getInstallDependenciesMessage(packageJson: PackageJson) {
-  const message = `${
-    isAnyDependency(packageJson)
-      ? `Installing npm packages...\n${
-          packageJson.dependencies
-            ? `\n  dependencies:\n    ${chalk.cyan(
-                Object.keys(packageJson.dependencies).join("\n    ")
-              )}\n    `
-            : ""
-        }${
-          packageJson.devDependencies
-            ? `\n  devDependencies:\n    ${chalk.cyan(
-                Object.keys(packageJson.devDependencies).join("\n    ")
-              )}\n    `
-            : ""
-        }${
-          packageJson.peerDependencies
-            ? `\n  peerDependencies:\n    ${chalk.cyan(
-                Object.keys(packageJson.peerDependencies).join("\n    ")
-              )}\n    `
-            : ""
-        }`
-      : "There are no packages to install"
-  }`;
-
-  return message;
-}
-
 export async function create(
   shouldAutoInstallDependencies: boolean,
   shouldReinitializeGit: boolean
 ) {
   const templates = readTemplates();
 
-  printTitle();
+  print.title();
   const projectName = await getProjectName();
   const projectPath = getNormalizedProjectPath(projectName);
   const templateName = await getTemplateName(templates);
   const template = findTemplate(templates, templateName);
   if (template) {
     await cloneRepository(projectPath, templateName, template.url);
-    updateProjectPackageJsonNamed(projectPath, projectName);
+    updateProjectPackageJsonName(projectPath, projectName);
     shouldAutoInstallDependencies && (await installDependencies(projectPath));
     shouldReinitializeGit && (await reinitializeGit(projectPath));
     printProjectStructure(projectPath);

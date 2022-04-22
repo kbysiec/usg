@@ -1,11 +1,11 @@
 import chalk from "chalk";
 import enquirer from "enquirer";
 import fs from "fs-extra";
+import ora from "ora";
 import path from "path";
 import shell from "shelljs";
 import tree from "tree-node-cli";
-import { create, getInstallDependenciesMessage } from "../src/commands";
-import { PackageJson } from "../src/types";
+import { create } from "../src/commands";
 
 jest.mock("ora", () =>
   jest.fn().mockReturnValue({
@@ -15,6 +15,7 @@ jest.mock("ora", () =>
   })
 );
 
+jest.mock("ora");
 jest.mock("tree-node-cli");
 
 describe("commands", () => {
@@ -22,6 +23,9 @@ describe("commands", () => {
   let readJSONSyncSpy: jest.SpyInstance;
   let writeJSONSyncSpy: jest.SpyInstance;
   let execSpy: jest.SpyInstance;
+  let startMock: jest.Mock;
+  let succeedMock: jest.Mock;
+  let failMock: jest.Mock;
   const template = {
     name: "test-template-1",
     url: "https://test-template-1-url.testDomain",
@@ -40,7 +44,15 @@ describe("commands", () => {
         .mockResolvedValueOnce({ projectName })
         .mockResolvedValueOnce({ templateName: template.name });
       execSpy = jest.spyOn(shell, "exec");
+      startMock = jest.fn();
+      succeedMock = jest.fn();
+      failMock = jest.fn();
       (tree as jest.Mock).mockClear();
+      (ora as unknown as jest.Mock).mockImplementation(() => ({
+        start: startMock,
+        succeed: succeedMock,
+        fail: failMock,
+      }));
     });
     afterEach(() => {
       jest.restoreAllMocks();
@@ -61,7 +73,6 @@ describe("commands", () => {
      #######   ######   ######
   `);
       readJSONSyncSpy.mockReturnValue([]);
-
       await create(false, false);
       expect(logSpy).nthCalledWith(1, logo);
     });
@@ -75,16 +86,6 @@ describe("commands", () => {
       expect(execSpy.mock.calls[0][0]).toEqual(
         `git clone ${template.url} ${projectPath}`
       );
-    });
-
-    it("should error be thrown if cloning the chosen template was broken", () => {
-      const errorMessage = "test error";
-      execSpy.mockImplementation((_comm, _opts, callback) =>
-        callback(1, null, errorMessage)
-      );
-      readJSONSyncSpy.mockReturnValue([template]);
-
-      expect(create(false, false)).rejects.toBe(errorMessage);
     });
 
     it("should update template package.json name property to project name", async () => {
@@ -143,59 +144,6 @@ describe("commands", () => {
       await create(false, false);
 
       expect(logSpy.mock.calls[2][0]).toEqual(testStructure);
-    });
-  });
-
-  describe("getInstallDependenciesMessage", () => {
-    it("should return no packages to install if there is not any dependency", async () => {
-      const packageJson = {
-        name: "old-name",
-        dependencies: {},
-        devDependencies: {},
-        peerDependencies: {},
-      };
-
-      expect(getInstallDependenciesMessage(packageJson)).toEqual(
-        "There are no packages to install"
-      );
-    });
-
-    it("should return message with listed dependencies to install", async () => {
-      let packageJson: PackageJson = {
-        dependencies: { test: "0.0.0", test2: "0.0.0", test3: "0.0.0" },
-      };
-
-      expect(
-        getInstallDependenciesMessage(packageJson).replace(/\s/g, "")
-      ).toEqual(
-        `Installing npm packages... dependencies: ${chalk.cyan(
-          "test\n test2\n test3"
-        )}`.replace(/\s/g, "")
-      );
-
-      packageJson = {
-        devDependencies: { test: "0.0.0" },
-      };
-
-      expect(
-        getInstallDependenciesMessage(packageJson).replace(/\s/g, "")
-      ).toEqual(
-        `Installing npm packages... devDependencies: ${chalk.cyan(
-          "test"
-        )}`.replace(/\s/g, "")
-      );
-
-      packageJson = {
-        peerDependencies: { test: "0.0.0" },
-      };
-
-      expect(
-        getInstallDependenciesMessage(packageJson).replace(/\s/g, "")
-      ).toEqual(
-        `Installing npm packages... peerDependencies: ${chalk.cyan(
-          "test"
-        )}`.replace(/\s/g, "")
-      );
     });
   });
 });
