@@ -8,7 +8,7 @@ import { print } from "./messages";
 import { isAnyDependency } from "./shared";
 import { PackageJson, Template } from "./types";
 
-function readTemplates() {
+function fetchTemplates() {
   const filePath = path.join(process.cwd(), "templates.json");
   const templates: Template[] = fs.readJSONSync(filePath);
   return templates;
@@ -156,7 +156,7 @@ export async function create(
   shouldReinitializeGit: boolean
 ) {
   try {
-    const templates = readTemplates();
+    const templates = fetchTemplates();
 
     print.title();
     const projectName = await getProjectName();
