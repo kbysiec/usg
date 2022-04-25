@@ -7,10 +7,11 @@ import tree from "tree-node-cli";
 import { create } from "../src/commands";
 
 const mockFail = jest.fn();
+const mockStart = jest.fn();
 
 jest.mock("ora", () => {
   return jest.fn(() => ({
-    start: jest.fn(),
+    start: mockStart,
     succeed: jest.fn(),
     fail: mockFail,
   }));
@@ -53,6 +54,7 @@ describe("commands", () => {
     afterEach(() => {
       jest.restoreAllMocks();
       mockFail.mockClear();
+      mockStart.mockClear();
     });
     afterAll(() => {
       jest.unmock("ora");
@@ -202,6 +204,69 @@ describe("commands", () => {
 
       expect(mockFail).toHaveBeenCalledWith(
         "Chosen template doesn't have url. Choose another one.\n  Operation cancelled"
+      );
+    });
+
+    it("should return message with listed dependencies to install", async () => {
+      execSpy.mockImplementation((_comm, _opts, callback) => callback(0));
+
+      // printing listing dependencies
+
+      readJSONSyncSpy.mockReturnValueOnce([template]).mockReturnValue({
+        name: "old-name",
+        dependencies: { test: "0.0.0", test2: "0.0.0", test3: "0.0.0" },
+        devDependencies: {},
+        peerDependencies: {},
+      });
+
+      await create(true, false);
+
+      expect(mockStart.mock.calls[2][0].replace(/\s/g, "")).toEqual(
+        `Installing npm packages... dependencies: ${chalk.cyan(
+          "test\n test2\n test3"
+        )}`.replace(/\s/g, "")
+      );
+
+      // printing listing devDependencies
+
+      promptSpy
+        .mockResolvedValueOnce({ projectName })
+        .mockResolvedValueOnce({ templateName: template.name });
+
+      readJSONSyncSpy.mockReturnValueOnce([template]).mockReturnValue({
+        name: "old-name",
+        dependencies: {},
+        devDependencies: { test: "0.0.0", test2: "0.0.0", test3: "0.0.0" },
+        peerDependencies: {},
+      });
+
+      await create(true, false);
+
+      expect(mockStart.mock.calls[5][0].replace(/\s/g, "")).toEqual(
+        `Installing npm packages... devDependencies: ${chalk.cyan(
+          "test\n test2\n test3"
+        )}`.replace(/\s/g, "")
+      );
+
+      // printing listing peerDependencies
+
+      promptSpy
+        .mockResolvedValueOnce({ projectName })
+        .mockResolvedValueOnce({ templateName: template.name });
+
+      readJSONSyncSpy.mockReturnValueOnce([template]).mockReturnValue({
+        name: "old-name",
+        dependencies: {},
+        devDependencies: {},
+        peerDependencies: { test: "0.0.0", test2: "0.0.0", test3: "0.0.0" },
+      });
+
+      await create(true, false);
+
+      expect(mockStart.mock.calls[8][0].replace(/\s/g, "")).toEqual(
+        `Installing npm packages... peerDependencies: ${chalk.cyan(
+          "test\n test2\n test3"
+        )}`.replace(/\s/g, "")
       );
     });
   });
