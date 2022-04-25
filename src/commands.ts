@@ -6,11 +6,11 @@ import shell from "shelljs";
 import tree from "tree-node-cli";
 import { print } from "./messages";
 import { isAnyDependency } from "./shared";
-import { PackageJson, Template } from "./types";
+import { PackageJson, Template, Templates } from "./types";
 
 function fetchTemplates() {
   const filePath = path.join(process.cwd(), "templates.json");
-  const templates: Template[] = fs.readJSONSync(filePath);
+  const templates: Templates = fs.readJSONSync(filePath);
   return templates;
 }
 
@@ -29,12 +29,24 @@ function getNormalizedProjectPath(projectName: string) {
   return path.join(rootPath, projectName);
 }
 
-async function getTemplateName(templates: Template[]) {
+async function getTemplateType(templates: Templates) {
+  const { templateType } = await enquirer.prompt<{ templateType: string }>({
+    type: "select",
+    name: "templateType",
+    message: "Select a template type",
+    choices: getTemplateTypeChoices(templates),
+    limit: 6,
+  });
+
+  return templateType;
+}
+
+async function getTemplateName(templates: Templates, templateType: string) {
   const { templateName } = await enquirer.prompt<{ templateName: string }>({
     type: "autocomplete",
     name: "templateName",
     message: "Select a template",
-    choices: getTemplateChoices(templates),
+    choices: getTemplateChoices(templates, templateType),
     limit: 6,
   });
 
@@ -45,14 +57,24 @@ function findTemplate(templates: Template[], templateName: string) {
   return templates.find((t) => t.name === templateName);
 }
 
-function getTemplateChoices(templates: Template[]) {
-  return templates.map((template) => ({
+function getTemplateTypeChoices(templates: Templates) {
+  return Object.keys(templates).map((type) => ({
+    name: type,
+    value: type,
+    hint: "",
+  }));
+}
+
+function getTemplateChoices(templates: Templates, templateType: string) {
+  const filteredTemplates = templates[templateType].map((template) => ({
     name: `* ${template.name}`,
     value: template.name,
     hint: `${chalk.blue(`- ${template.description}`)}\n(${chalk.grey(
       template.url
     )})\n`,
   }));
+
+  return filteredTemplates;
 }
 
 async function execShellCommand(command: string) {
@@ -170,8 +192,9 @@ export async function create(
       print.error.pathExists();
       return;
     }
-    const templateName = await getTemplateName(templates);
-    const template = findTemplate(templates, templateName);
+    const templateType = await getTemplateType(templates);
+    const templateName = await getTemplateName(templates, templateType);
+    const template = findTemplate(templates[templateType], templateName);
     if (!template) {
       print.error.templateDoesNotExist();
       return;

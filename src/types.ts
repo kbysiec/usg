@@ -4,6 +4,10 @@ export interface Template {
   description: string;
 }
 
+export interface Templates {
+  [key: string]: Template[];
+}
+
 export interface PackageJson {
   name?: string;
   dependencies?: { [key: string]: string };

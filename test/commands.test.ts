@@ -38,7 +38,7 @@ describe("commands", () => {
       logSpy = jest.spyOn(console, "log").mockImplementation();
       readJSONSyncSpy = jest
         .spyOn(fs, "readJSONSync")
-        .mockReturnValueOnce([template])
+        .mockReturnValueOnce({ vite: [template] })
         .mockReturnValue({ name: "old-name" });
       writeJSONSyncSpy = jest.spyOn(fs, "writeJSONSync").mockImplementation();
       pathExistsSyncSpy = jest
@@ -47,6 +47,7 @@ describe("commands", () => {
       promptSpy = jest
         .spyOn(enquirer, "prompt")
         .mockResolvedValueOnce({ projectName })
+        .mockResolvedValueOnce({ templateType: "vite" })
         .mockResolvedValueOnce({ templateName: template.name });
       execSpy = jest.spyOn(shell, "exec");
       (tree as jest.Mock).mockClear();
@@ -103,12 +104,14 @@ describe("commands", () => {
 
     it("should install npm dependencies if shouldAutoInstallDependencies is true", async () => {
       execSpy.mockImplementation((_comm, _opts, callback) => callback(0));
-      readJSONSyncSpy.mockReturnValueOnce([template]).mockReturnValue({
-        name: "old-name",
-        dependencies: { test: "0.0.0" },
-        devDependencies: { test: "0.0.0" },
-        peerDependencies: { test: "0.0.0" },
-      });
+      readJSONSyncSpy
+        .mockReturnValueOnce({ vite: [template] })
+        .mockReturnValue({
+          name: "old-name",
+          dependencies: { test: "0.0.0" },
+          devDependencies: { test: "0.0.0" },
+          peerDependencies: { test: "0.0.0" },
+        });
 
       await create(true, false);
 
@@ -139,7 +142,7 @@ describe("commands", () => {
       execSpy.mockImplementationOnce((_comm, _opts, callback) =>
         callback(1, null, error)
       );
-      readJSONSyncSpy.mockReturnValue([template]);
+      readJSONSyncSpy.mockReturnValue({ vite: [template] });
 
       await create(false, false);
 
@@ -151,7 +154,7 @@ describe("commands", () => {
       execSpy.mockImplementationOnce((_comm, _opts, callback) =>
         callback(1, null, error)
       );
-      readJSONSyncSpy.mockReturnValue([template]);
+      readJSONSyncSpy.mockReturnValue({ vite: [template] });
 
       await create(false, false);
 
@@ -160,7 +163,7 @@ describe("commands", () => {
 
     it("should handle passing empty project name", async () => {
       promptSpy.mockReset().mockResolvedValueOnce([""]);
-      readJSONSyncSpy.mockReturnValue([template]);
+      readJSONSyncSpy.mockReturnValue({ vite: [template] });
 
       await create(false, false);
 
@@ -171,7 +174,7 @@ describe("commands", () => {
 
     it("should handle passing existing project name", async () => {
       pathExistsSyncSpy.mockReset().mockReturnValue(true);
-      readJSONSyncSpy.mockReturnValue([template]);
+      readJSONSyncSpy.mockReturnValue({ vite: [template] });
 
       await create(false, false);
 
@@ -184,8 +187,9 @@ describe("commands", () => {
       promptSpy
         .mockReset()
         .mockResolvedValueOnce({ projectName })
+        .mockResolvedValueOnce({ templateType: "vite" })
         .mockResolvedValueOnce({ templateName: "not existing template name" });
-      readJSONSyncSpy.mockReturnValue([template]);
+      readJSONSyncSpy.mockReturnValue({ vite: [template] });
 
       await create(false, false);
 
@@ -197,8 +201,8 @@ describe("commands", () => {
     it("should handle missing url for chosen template", async () => {
       readJSONSyncSpy
         .mockReset()
-        .mockReturnValueOnce([{ ...template, url: undefined }]);
-      readJSONSyncSpy.mockReturnValue([template]);
+        .mockReturnValueOnce({ vite: [{ ...template, url: undefined }] });
+      readJSONSyncSpy.mockReturnValue({ vite: [template] });
 
       await create(false, false);
 
@@ -212,12 +216,14 @@ describe("commands", () => {
 
       // printing listing dependencies
 
-      readJSONSyncSpy.mockReturnValueOnce([template]).mockReturnValue({
-        name: "old-name",
-        dependencies: { test: "0.0.0", test2: "0.0.0", test3: "0.0.0" },
-        devDependencies: {},
-        peerDependencies: {},
-      });
+      readJSONSyncSpy
+        .mockReturnValueOnce({ vite: [template] })
+        .mockReturnValue({
+          name: "old-name",
+          dependencies: { test: "0.0.0", test2: "0.0.0", test3: "0.0.0" },
+          devDependencies: {},
+          peerDependencies: {},
+        });
 
       await create(true, false);
 
@@ -231,14 +237,17 @@ describe("commands", () => {
 
       promptSpy
         .mockResolvedValueOnce({ projectName })
+        .mockResolvedValueOnce({ templateType: "vite" })
         .mockResolvedValueOnce({ templateName: template.name });
 
-      readJSONSyncSpy.mockReturnValueOnce([template]).mockReturnValue({
-        name: "old-name",
-        dependencies: {},
-        devDependencies: { test: "0.0.0", test2: "0.0.0", test3: "0.0.0" },
-        peerDependencies: {},
-      });
+      readJSONSyncSpy
+        .mockReturnValueOnce({ vite: [template] })
+        .mockReturnValue({
+          name: "old-name",
+          dependencies: {},
+          devDependencies: { test: "0.0.0", test2: "0.0.0", test3: "0.0.0" },
+          peerDependencies: {},
+        });
 
       await create(true, false);
 
@@ -252,14 +261,17 @@ describe("commands", () => {
 
       promptSpy
         .mockResolvedValueOnce({ projectName })
+        .mockResolvedValueOnce({ templateType: "vite" })
         .mockResolvedValueOnce({ templateName: template.name });
 
-      readJSONSyncSpy.mockReturnValueOnce([template]).mockReturnValue({
-        name: "old-name",
-        dependencies: {},
-        devDependencies: {},
-        peerDependencies: { test: "0.0.0", test2: "0.0.0", test3: "0.0.0" },
-      });
+      readJSONSyncSpy
+        .mockReturnValueOnce({ vite: [template] })
+        .mockReturnValue({
+          name: "old-name",
+          dependencies: {},
+          devDependencies: {},
+          peerDependencies: { test: "0.0.0", test2: "0.0.0", test3: "0.0.0" },
+        });
 
       await create(true, false);
 
