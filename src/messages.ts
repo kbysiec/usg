@@ -1,6 +1,5 @@
 import chalk from "chalk";
 import ora from "ora";
-import { isAnyDependency } from "./shared";
 import { PackageJson, SpinnerMessageType } from "./types";
 
 const messages = {
@@ -51,29 +50,27 @@ function printTitle() {
 }
 
 function getInstallDependenciesMessage(packageJson: PackageJson) {
-  const message = `${
-    isAnyDependency(packageJson)
-      ? `Installing npm packages...\n${
-          packageJson.dependencies
-            ? `\n  dependencies:\n    ${chalk.cyan(
-                Object.keys(packageJson.dependencies).join("\n    ")
-              )}\n    `
-            : ""
-        }${
-          packageJson.devDependencies
-            ? `\n  devDependencies:\n    ${chalk.cyan(
-                Object.keys(packageJson.devDependencies).join("\n    ")
-              )}\n    `
-            : ""
-        }${
-          packageJson.peerDependencies
-            ? `\n  peerDependencies:\n    ${chalk.cyan(
-                Object.keys(packageJson.peerDependencies).join("\n    ")
-              )}\n    `
-            : ""
-        }`
-      : "There are no packages to install"
-  }`;
+  const message = `${`Installing npm packages...\n${
+    packageJson.dependencies && Object.keys(packageJson.dependencies).length > 0
+      ? `\n  dependencies:\n    ${chalk.cyan(
+          Object.keys(packageJson.dependencies).join("\n    ")
+        )}\n    `
+      : ""
+  }${
+    packageJson.devDependencies &&
+    Object.keys(packageJson.devDependencies).length > 0
+      ? `\n  devDependencies:\n    ${chalk.cyan(
+          Object.keys(packageJson.devDependencies).join("\n    ")
+        )}\n    `
+      : ""
+  }${
+    packageJson.peerDependencies &&
+    Object.keys(packageJson.peerDependencies).length > 0
+      ? `\n  peerDependencies:\n    ${chalk.cyan(
+          Object.keys(packageJson.peerDependencies).join("\n    ")
+        )}\n    `
+      : ""
+  }`}`;
 
   return message;
 }
