@@ -19,12 +19,12 @@ jest.mock("ora", () => {
 jest.mock("tree-node-cli");
 
 describe("commands", () => {
-  let logSpy: jest.SpyInstance;
-  let readJSONSyncSpy: jest.SpyInstance;
-  let writeJSONSyncSpy: jest.SpyInstance;
-  let pathExistsSyncSpy: jest.SpyInstance;
-  let promptSpy: jest.SpyInstance;
-  let execSpy: jest.SpyInstance;
+  let spyLog: jest.SpyInstance;
+  let spyReadJSONSync: jest.SpyInstance;
+  let spyWriteJSONSync: jest.SpyInstance;
+  let spyPathExistsSync: jest.SpyInstance;
+  let spyPrompt: jest.SpyInstance;
+  let spyExec: jest.SpyInstance;
   const template = {
     name: "test-template-1",
     url: "https://test-template-1-url.testDomain",
@@ -35,21 +35,21 @@ describe("commands", () => {
 
   describe("create", () => {
     beforeEach(() => {
-      logSpy = jest.spyOn(console, "log").mockImplementation();
-      readJSONSyncSpy = jest
+      spyLog = jest.spyOn(console, "log").mockImplementation();
+      spyReadJSONSync = jest
         .spyOn(fs, "readJSONSync")
         .mockReturnValueOnce({ vite: [template] })
         .mockReturnValue({ name: "old-name" });
-      writeJSONSyncSpy = jest.spyOn(fs, "writeJSONSync").mockImplementation();
-      pathExistsSyncSpy = jest
+      spyWriteJSONSync = jest.spyOn(fs, "writeJSONSync").mockImplementation();
+      spyPathExistsSync = jest
         .spyOn(fs, "pathExistsSync")
         .mockReturnValue(false);
-      promptSpy = jest
+      spyPrompt = jest
         .spyOn(enquirer, "prompt")
         .mockResolvedValueOnce({ projectName })
         .mockResolvedValueOnce({ templateType: "vite" })
         .mockResolvedValueOnce({ templateName: template.name });
-      execSpy = jest.spyOn(shell, "exec");
+      spyExec = jest.spyOn(shell, "exec");
       (tree as jest.Mock).mockClear();
     });
     afterEach(() => {
@@ -63,8 +63,6 @@ describe("commands", () => {
     });
 
     it("should print logo", async () => {
-      execSpy.mockImplementation((_comm, _opts, callback) => callback(0));
-
       const logo = chalk.blue(`
     ##     ##  ######   ######
     ##     ## ##    ## ##    ##
@@ -75,25 +73,23 @@ describe("commands", () => {
      #######   ######   ######
   `);
       await create(false, false);
-      expect(logSpy).nthCalledWith(1, logo);
+      expect(spyLog).nthCalledWith(1, logo);
     });
 
     it("should clone successfylly the chosen template", async () => {
-      execSpy.mockImplementation((_comm, _opts, callback) => callback(0));
-
       await create(false, false);
 
-      expect(execSpy.mock.calls[0][0]).toEqual(
+      expect(spyExec.mock.calls[0][0]).toEqual(
         `git clone ${template.url} ${projectPath}`
       );
     });
 
     it("should update template package.json name property to project name", async () => {
+      spyExec.mockImplementation((_comm, _opts, callback) => callback(0));
       const packageJsonPath = path.join(projectPath, "package.json");
-      execSpy.mockImplementation((_comm, _opts, callback) => callback(0));
       await create(false, false);
 
-      expect(writeJSONSyncSpy).toHaveBeenCalledWith(
+      expect(spyWriteJSONSync).toHaveBeenCalledWith(
         packageJsonPath,
         {
           name: projectName,
@@ -103,8 +99,8 @@ describe("commands", () => {
     });
 
     it("should install npm dependencies if shouldAutoInstallDependencies is true", async () => {
-      execSpy.mockImplementation((_comm, _opts, callback) => callback(0));
-      readJSONSyncSpy
+      spyExec.mockImplementation((_comm, _opts, callback) => callback(0));
+      spyReadJSONSync
         .mockReturnValueOnce({ vite: [template] })
         .mockReturnValue({
           name: "old-name",
@@ -115,34 +111,33 @@ describe("commands", () => {
 
       await create(true, false);
 
-      expect(execSpy.mock.calls[1][0]).toEqual(
+      expect(spyExec.mock.calls[1][0]).toEqual(
         `cd ${projectPath} && npm install`
       );
     });
 
     it("should reinitialize git repository if shouldReinitializeGit is true", async () => {
-      execSpy.mockImplementation((_comm, _opts, callback) => callback(0));
+      spyExec.mockImplementation((_comm, _opts, callback) => callback(0));
       await create(false, true);
 
-      expect(execSpy.mock.calls[1][0]).toEqual(`cd ${projectPath} && git init`);
+      expect(spyExec.mock.calls[1][0]).toEqual(`cd ${projectPath} && git init`);
     });
 
     it("should print folder structure for copied template", async () => {
-      execSpy.mockImplementation((_comm, _opts, callback) => callback(0));
+      spyExec.mockImplementation((_comm, _opts, callback) => callback(0));
       const testStructure = "test structure";
       (tree as jest.Mock).mockReturnValue(testStructure);
 
       await create(false, false);
 
-      expect(logSpy.mock.calls[2][0]).toEqual(testStructure);
+      expect(spyLog.mock.calls[2][0]).toEqual(testStructure);
     });
 
     it("should handle unexpected error and print error callstack", async () => {
       const error = Error("test error");
-      execSpy.mockImplementationOnce((_comm, _opts, callback) =>
+      spyExec.mockImplementationOnce((_comm, _opts, callback) =>
         callback(1, null, error)
       );
-      readJSONSyncSpy.mockReturnValue({ vite: [template] });
 
       await create(false, false);
 
@@ -151,10 +146,9 @@ describe("commands", () => {
 
     it("should handle operation cancellation by user", async () => {
       const error = "";
-      execSpy.mockImplementationOnce((_comm, _opts, callback) =>
+      spyExec.mockImplementationOnce((_comm, _opts, callback) =>
         callback(1, null, error)
       );
-      readJSONSyncSpy.mockReturnValue({ vite: [template] });
 
       await create(false, false);
 
@@ -162,8 +156,7 @@ describe("commands", () => {
     });
 
     it("should handle passing empty project name", async () => {
-      promptSpy.mockReset().mockResolvedValueOnce([""]);
-      readJSONSyncSpy.mockReturnValue({ vite: [template] });
+      spyPrompt.mockReset().mockResolvedValueOnce([""]);
 
       await create(false, false);
 
@@ -173,8 +166,7 @@ describe("commands", () => {
     });
 
     it("should handle passing existing project name", async () => {
-      pathExistsSyncSpy.mockReset().mockReturnValue(true);
-      readJSONSyncSpy.mockReturnValue({ vite: [template] });
+      spyPathExistsSync.mockReset().mockReturnValue(true);
 
       await create(false, false);
 
@@ -184,12 +176,11 @@ describe("commands", () => {
     });
 
     it("should handle passing not existing template name", async () => {
-      promptSpy
+      spyPrompt
         .mockReset()
         .mockResolvedValueOnce({ projectName })
         .mockResolvedValueOnce({ templateType: "vite" })
         .mockResolvedValueOnce({ templateName: "not existing template name" });
-      readJSONSyncSpy.mockReturnValue({ vite: [template] });
 
       await create(false, false);
 
@@ -199,10 +190,9 @@ describe("commands", () => {
     });
 
     it("should handle missing url for chosen template", async () => {
-      readJSONSyncSpy
+      spyReadJSONSync
         .mockReset()
         .mockReturnValueOnce({ vite: [{ ...template, url: undefined }] });
-      readJSONSyncSpy.mockReturnValue({ vite: [template] });
 
       await create(false, false);
 
@@ -212,11 +202,11 @@ describe("commands", () => {
     });
 
     it("should return message with listed dependencies to install", async () => {
-      execSpy.mockImplementation((_comm, _opts, callback) => callback(0));
+      spyExec.mockImplementation((_comm, _opts, callback) => callback(0));
 
       // printing listing dependencies
 
-      readJSONSyncSpy
+      spyReadJSONSync
         .mockReturnValueOnce({ vite: [template] })
         .mockReturnValue({
           name: "old-name",
@@ -235,12 +225,12 @@ describe("commands", () => {
 
       // printing listing devDependencies
 
-      promptSpy
+      spyPrompt
         .mockResolvedValueOnce({ projectName })
         .mockResolvedValueOnce({ templateType: "vite" })
         .mockResolvedValueOnce({ templateName: template.name });
 
-      readJSONSyncSpy
+      spyReadJSONSync
         .mockReturnValueOnce({ vite: [template] })
         .mockReturnValue({
           name: "old-name",
@@ -259,12 +249,12 @@ describe("commands", () => {
 
       // printing listing peerDependencies
 
-      promptSpy
+      spyPrompt
         .mockResolvedValueOnce({ projectName })
         .mockResolvedValueOnce({ templateType: "vite" })
         .mockResolvedValueOnce({ templateName: template.name });
 
-      readJSONSyncSpy
+      spyReadJSONSync
         .mockReturnValueOnce({ vite: [template] })
         .mockReturnValue({
           name: "old-name",
