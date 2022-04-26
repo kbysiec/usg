@@ -5,7 +5,7 @@ const prog = sade("cli");
 prog.version("0.0.0");
 
 prog
-  .command("create")
+  .command("create", "", { default: true })
   .describe("Create action")
   .option(
     "-a, --auto-install",
