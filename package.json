@@ -1,7 +1,27 @@
 {
   "name": "usg",
-  "private": true,
-  "version": "0.0.0",
+  "description": "Universal Starter Generator - easy browsing and generating your next project",
+  "version": "0.0.1",
+  "author": {
+    "name": "Kamil Bysiec",
+    "email": "kamil.bysiec@agileplayers.com",
+    "url": "https://github.com/kbysiec"
+  },
+  "homepage": "https://github.com/kbysiec/usg",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/kbysiec/usg.git"
+  },
+  "bugs": {
+    "url": "https://github.com/kbysiec/usg/issues"
+  },
+  "engines": {
+    "node": ">=14"
+  },
+  "license": "MIT",
+  "bin": {
+    "usg": "./dist/index.js"
+  },
   "scripts": {
     "start": "rimraf ./dist && tsc -p ./tsconfig.json --watch",
     "build": "rimraf ./dist && tsc -p ./tsconfig.json",
