@@ -63,7 +63,7 @@ describe("commands", () => {
     });
 
     it("should print logo", async () => {
-      const logo = chalk.blue(`
+      const logo = chalk.cyan(`
     ##     ##  ######   ######
     ##     ## ##    ## ##    ##
     ##     ## ##       ##
@@ -152,7 +152,9 @@ describe("commands", () => {
 
       await create(false, false);
 
-      expect(mockFail).toHaveBeenCalledWith("Operation cancelled by user");
+      expect(mockFail).toHaveBeenCalledWith(
+        chalk.red("Operation cancelled by user")
+      );
     });
 
     it("should handle passing empty project name", async () => {
@@ -161,7 +163,7 @@ describe("commands", () => {
       await create(false, false);
 
       expect(mockFail).toHaveBeenCalledWith(
-        "Project name is empty.\n  Operation cancelled"
+        chalk.red("Project name is empty.\n  Operation cancelled")
       );
     });
 
@@ -171,7 +173,7 @@ describe("commands", () => {
       await create(false, false);
 
       expect(mockFail).toHaveBeenCalledWith(
-        "Target directory already exists.\n  Operation cancelled"
+        chalk.red("Target directory already exists.\n  Operation cancelled")
       );
     });
 
@@ -185,7 +187,9 @@ describe("commands", () => {
       await create(false, false);
 
       expect(mockFail).toHaveBeenCalledWith(
-        "Chosen template doesn't exist. Choose another one.\n  Operation cancelled"
+        chalk.red(
+          "Chosen template doesn't exist. Choose another one.\n  Operation cancelled"
+        )
       );
     });
 
@@ -197,7 +201,9 @@ describe("commands", () => {
       await create(false, false);
 
       expect(mockFail).toHaveBeenCalledWith(
-        "Chosen template doesn't have url. Choose another one.\n  Operation cancelled"
+        chalk.red(
+          "Chosen template doesn't have url. Choose another one.\n  Operation cancelled"
+        )
       );
     });
 

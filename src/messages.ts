@@ -19,13 +19,19 @@ const messages = {
     reinitializingGit: () => `Git reinitialized`,
   },
   fail: {
-    operationCancelledByUser: () => "Operation cancelled by user",
-    emptyProject: () => "Project name is empty.\n  Operation cancelled",
-    pathExists: () => "Target directory already exists.\n  Operation cancelled",
+    operationCancelledByUser: () => chalk.red("Operation cancelled by user"),
+    emptyProject: () =>
+      chalk.red("Project name is empty.\n  Operation cancelled"),
+    pathExists: () =>
+      chalk.red("Target directory already exists.\n  Operation cancelled"),
     templateDoesNotExist: () =>
-      "Chosen template doesn't exist. Choose another one.\n  Operation cancelled",
+      chalk.red(
+        "Chosen template doesn't exist. Choose another one.\n  Operation cancelled"
+      ),
     templateDoesNotHaveUrl: () =>
-      "Chosen template doesn't have url. Choose another one.\n  Operation cancelled",
+      chalk.red(
+        "Chosen template doesn't have url. Choose another one.\n  Operation cancelled"
+      ),
   },
 };
 
@@ -46,7 +52,7 @@ function printTitle() {
     ##     ## ##    ## ##    ##
      #######   ######   ######
   `;
-  console.log(chalk.blue(logo));
+  console.log(chalk.cyan(logo));
 }
 
 function getInstallDependenciesMessage(packageJson: PackageJson) {

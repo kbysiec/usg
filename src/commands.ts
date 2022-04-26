@@ -69,7 +69,7 @@ function getTemplateChoices(templates: Templates, templateType: string) {
   const filteredTemplates = templates[templateType].map((template) => ({
     name: `* ${template.name}`,
     value: template.name,
-    hint: `${chalk.blue(`- ${template.description}`)}\n(${chalk.grey(
+    hint: `${chalk.dim.cyan(`- ${template.description}`)}\n(${chalk.grey(
       template.url
     )})\n`,
   }));
@@ -165,7 +165,7 @@ function getProjectStructure(projectPath: string) {
 
 function printProjectStructure(projectPath: string) {
   const structure = getProjectStructure(projectPath);
-  console.log(chalk.blue("Project structure:\n"));
+  console.log(chalk.cyan("\nProject structure:\n"));
   console.log(structure);
 }
 
