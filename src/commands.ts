@@ -9,7 +9,7 @@ import { isAnyDependency } from "./shared";
 import { PackageJson, Template, Templates } from "./types";
 
 function fetchTemplates() {
-  const filePath = path.join(process.cwd(), "templates.json");
+  const filePath = path.join(__dirname, "..", "templates.json");
   const templates: Templates = fs.readJSONSync(filePath);
   return templates;
 }
@@ -25,8 +25,7 @@ async function getProjectName() {
 }
 
 function getNormalizedProjectPath(projectName: string) {
-  const rootPath = process.cwd();
-  return path.join(rootPath, projectName);
+  return path.join(process.cwd(), projectName);
 }
 
 async function getTemplateType(templates: Templates) {

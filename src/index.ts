@@ -7,7 +7,7 @@ import { create } from "./commands";
 import { PackageJson } from "./types";
 const prog = sade("cli");
 
-const filePath = path.join(process.cwd(), "package.json");
+const filePath = path.join(__dirname, "..", "package.json");
 const packageJson: PackageJson = fs.readJSONSync(filePath);
 
 prog.version(packageJson.version || "");
