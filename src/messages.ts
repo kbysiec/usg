@@ -113,7 +113,7 @@ export const print = {
       printWithSpinner("succeed", messages.succeed.reinitializingGit()),
   },
   error: {
-    any: (message?: string) => printWithSpinner("fail", message),
+    any: (message?: string) => printWithSpinner("fail", chalk.red(message)),
     operationCancelledByUser: () =>
       printWithSpinner("fail", messages.fail.operationCancelledByUser()),
     emptyProject: () => printWithSpinner("fail", messages.fail.emptyProject()),

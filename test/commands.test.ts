@@ -31,7 +31,7 @@ describe("commands", () => {
     description: "This is template entry only for testing purposes",
   };
   const projectName = "test-project-name";
-  const projectPath = path.join(process.cwd(), projectName);
+  const projectPath = path.join(__dirname, "..", projectName);
 
   describe("create", () => {
     beforeEach(() => {
@@ -141,7 +141,7 @@ describe("commands", () => {
 
       await create(false, false);
 
-      expect(mockFail).toHaveBeenCalledWith(error.stack);
+      expect(mockFail).toHaveBeenCalledWith(chalk.red(error.stack));
     });
 
     it("should handle operation cancellation by user", async () => {

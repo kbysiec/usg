@@ -210,6 +210,8 @@ export async function create(
   } catch (err: unknown) {
     if (err instanceof Error) {
       print.error.any(err.stack);
+    } else if (err) {
+      print.error.any(err as string);
     } else {
       print.error.operationCancelledByUser();
     }
