@@ -1,8 +1,14 @@
+import fs from "fs-extra";
+import path from "path";
 import sade from "sade";
 import { create } from "./commands";
+import { PackageJson } from "./types";
 const prog = sade("cli");
 
-prog.version("0.0.0");
+const filePath = path.join(process.cwd(), "package.json");
+const packageJson: PackageJson = fs.readJSONSync(filePath);
+
+prog.version(packageJson.version || "");
 
 prog
   .command("create", "", { default: true })
