@@ -61,6 +61,7 @@
     "ora": "^5.4.1",
     "sade": "^1.8.1",
     "shelljs": "^0.8.5",
-    "tree-node-cli": "^1.5.2"
+    "tree-node-cli": "^1.5.2",
+    "tslib": "^2.4.0"
   }
 }
