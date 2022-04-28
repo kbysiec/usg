@@ -1,6 +1,7 @@
 .history
 .husky
 .vscode
+.github
 coverage
 dist
 node_modules
