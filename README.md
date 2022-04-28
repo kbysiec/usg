@@ -3,6 +3,8 @@
 Universal Starter Generator (USG) is a simple command-line utility.
 The purpose of this package is easier navigation and searching among many popular starter projects.
 
+![usg demo](https://raw.githubusercontent.com/kbysiec/usg/master/.github/images/demo_usg.gif)
+
 ## Features
 - browsing popular starters for vite, webpack and esbuild
 - copying chosen template
@@ -11,15 +13,26 @@ The purpose of this package is easier navigation and searching among many popula
 
 ## Usage
 
-With USG, you can quickly bootstrap your next project in a moment. Enter the terminal and type:
+With USG, you can quickly bootstrap your next project in a moment.
 
-`npx usg`
+Enter the terminal and type:
+
+```
+npx usg
+```
+
+or
+
+```
+npm i -g usg
+usg
+```
 
 Then you will be prompted to answer a few questions to generate the project.
 
 The CLI comes with only the `create` command. It could be invoked by calling `usg` or `usg create`. Then the wizard allows the user to follow the instructions.
 
-Available options:
+### Available options:
 - `-a, --auto-install` - decide whether the npm dependencies should be automatically installed. The default value is set to `true`
 - `-r, --reinitialize-git` - decide whether the git repository should be reinitialized. The default value is set to `true`
 
