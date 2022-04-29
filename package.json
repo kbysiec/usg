@@ -1,7 +1,7 @@
 {
   "name": "usg",
   "description": "Universal Starter Generator - easy browsing and generating your next project",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "author": {
     "name": "Kamil Bysiec",
     "email": "kamil.bysiec@agileplayers.com",
@@ -64,5 +64,13 @@
     "shelljs": "^0.8.5",
     "tree-node-cli": "^1.5.2",
     "tslib": "^2.4.0"
-  }
+  },
+  "keywords": [
+    "starter",
+    "template",
+    "generator",
+    "vite",
+    "webpack",
+    "parcel"
+  ]
 }
