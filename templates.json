@@ -503,16 +503,186 @@
   ],
   "webpack": [
     {
-      "name": "webpack-demo",
-      "url": "#",
-      "description": "Webpack demo"
+      "name": "Angular2 Webpack Starter",
+      "url": "https://github.com/AngularClass/angular2-webpack-starter",
+      "description": "A Webpack driven Angular 2 Starter kit from AngularClass."
+    },
+    {
+      "name": "Angular2 Webpack",
+      "url": "https://github.com/preboot/angular2-webpack",
+      "description": "A complete, yet simple, starter for Angular 2 using Webpack from Preboot."
+    },
+    {
+      "name": "Angular2 Webpack Visual Studio",
+      "url": "https://github.com/damienbod/Angular2WebpackVisualStudio",
+      "description": "ASP.NET Core, Angular2 with Webpack and Visual Studio from Damien Bod."
+    },
+    {
+      "name": "Angular2 Starter",
+      "url": "https://github.com/schempy/angular2-typescript-webpack",
+      "description": "Angular2 starter kit with Typescript and Webpack from Brian Schemp."
+    },
+    {
+      "name": "Angular2 Seed",
+      "url": "https://github.com/angular/angular2-seed/",
+      "description": "A simple starter demonstrating the basic concepts of Angular2 from Pawel Kozlowski."
+    },
+    {
+      "name": "ES6 TodoMVC with Webpack",
+      "url": "https://github.com/kentcdodds/es6-todomvc",
+      "description": "Repo used to teach webpack. (Check branches). from Kent C. Dodds."
+    },
+    {
+      "name": "Kent C. Dodds",
+      "url": "https://github.com/kentcdodds",
+      "description": "Repo used to teach webpack. (Check branches). from Kent C. Dodds."
+    },
+    {
+      "name": "React Starter Kit",
+      "url": "https://github.com/kriasoft/react-starter-kit",
+      "description": "Isomorphic web app boilerplate from Kriasoft Team."
+    },
+    {
+      "name": "Kriasoft Team",
+      "url": "https://github.com/kriasoft",
+      "description": "Isomorphic web app boilerplate from Kriasoft Team."
+    },
+    {
+      "name": "React Redux Universal",
+      "url": "https://github.com/erikras/react-redux-universal-hot-example",
+      "description": "A starter boilerplate for a universal webapp from Erik Rasmussen."
+    },
+    {
+      "name": "Frontend Boilerplate",
+      "url": "https://github.com/tj/frontend-boilerplate",
+      "description": "A boilerplate of things that mostly shouldn't exist from TJ Holowaychuk."
+    },
+    {
+      "name": "ReactGo",
+      "url": "https://github.com/reactGo/reactGo",
+      "description": "Your One-Stop solution for a full-stack universal Redux from Ken Ding."
+    },
+    {
+      "name": "React Native Calculator",
+      "url": "https://github.com/benoitvallon/react-native-nw-react-calculator",
+      "description": "Mobile, desktop and website Apps with the same code from Benoit Vallon."
+    },
+    {
+      "name": "React Cordova Boilerplate",
+      "url": "https://github.com/unimonkiez/react-cordova-boilerplate",
+      "description": "TodoMVC example for React with Cordova from Yuval Saraf."
+    },
+    {
+      "name": "React Universally",
+      "url": "https://github.com/ctrlplusb/react-universally",
+      "description": "A starter kit giving you the minimum for a production ready universal react application."
+    },
+    {
+      "name": "Razzle Material-UI Styled Example",
+      "url": "https://github.com/kireerik/razzle-material-ui-styled-example",
+      "description": "With Styled Components using Express with compression from Erik Engi."
+    },
+    {
+      "name": "Read",
+      "url": "https://github.com/logustra/read",
+      "description": "A highly scalable react boilerplate from logustra"
+    },
+    {
+      "name": "Vuad",
+      "url": "https://github.com/logustra/vuad",
+      "description": "A highly scalable vue boilerplate from logustra"
     }
   ],
   "parcel": [
     {
-      "name": "parcel-demo",
-      "url": "#",
-      "description": "Parcel demo"
+      "name": "Preact Boilerplate",
+      "url": "https://github.com/SafdarJamal/preact-boilerplate",
+      "description": "A minimal Preact boilerplate project, powered by Parcel."
+    },
+    {
+      "name": "Parcel-Tsx-Template",
+      "url": "https://github.com/linbudu599/Parcel-Tsx-Template",
+      "description": "A Simple Parcel Template With React & Typescript."
+    },
+    {
+      "name": "Element UI",
+      "url": "https://github.com/bubnenkoff/parcel-vue-template",
+      "description": "Minimal Vue Element UI Parcel template."
+    },
+    {
+      "name": "React",
+      "url": "https://github.com/jaredpalmer/react-parcel-example",
+      "description": "Minimum viable React app."
+    },
+    {
+      "name": "React with SSR",
+      "url": "https://github.com/gregtillbrook/react-head-start",
+      "description": "React starter app including Server Side Rendering and code splitting."
+    },
+    {
+      "name": "React with TypeScript",
+      "url": "https://github.com/adhrinae/ts-react-parcel",
+      "description": "Example code and test cases with React, TypeScript, Jest."
+    },
+    {
+      "name": "React + TypeScript + CSS Modules + SASS",
+      "url": "https://github.com/ngduc/parcelui",
+      "description": "Boilerplate to create a webapp with: React + TypeScript + CSS Modules + SASS."
+    },
+    {
+      "name": "Angular",
+      "url": "https://github.com/DeMoorJasper/Angular-Parcel-Boilerplate",
+      "description": "Angular boilerplate."
+    },
+    {
+      "name": "Vue.js",
+      "url": "https://github.com/parcel-bundler/examples/tree/master/vue",
+      "description": "Basic Hello, World! example."
+    },
+    {
+      "name": "Vue.js with Vuex and Vue Router",
+      "url": "https://github.com/proYang/vue-parcel-demo",
+      "description": "Quickstart example including Code Splitting, Hot Reloading, Vuex, Vue Router and Less."
+    },
+    {
+      "name": "Metal.js",
+      "url": "https://github.com/matuzalemsteles/metal-parcel-example",
+      "description": "Simple example with Metal.js."
+    },
+    {
+      "name": "ReasonReact",
+      "url": "https://github.com/Raincal/parcel-reason-react-app",
+      "description": "Simple Reason React app."
+    },
+    {
+      "name": "PixiJS with Typescript",
+      "url": "https://github.com/lucas-jones/pixi-ts-parcel-example",
+      "description": "Simple PixiJS starter app."
+    },
+    {
+      "name": "Dart",
+      "url": "https://github.com/neutrino2211/parcel-plugin-dart/tree/master/examples/helloworld",
+      "description": "Simple Hello, World example."
+    },
+    {
+      "name": "AWS IoT Button logger to git",
+      "url": "https://github.com/kachkaev/aws-iot-button-logger-to-git/",
+      "description": "A beginner-friendly AWS Lambda function that logs events from IoT devices into a git repository of your choice. Written in TypeScript, tested with Jest, compiled with Parcel into a single file. The project uses Azure Pipelines as CI."
+    },
+    {
+      "name": "Phaser 3 with Parcel",
+      "url": "https://github.com/samme/phaser-parcel",
+      "description": "Simple Phaser game template."
+    },
+    {
+      "name": "Parcel Github Pages Boilerplate",
+      "url": "https://github.com/nicolas-van/parcel-github-pages-boilerplate",
+      "description": "Boilerplate to automatically publish to Github Pages through Github Actions."
+    },
+    {
+      "name": "Parcel Start",
+      "url": "https://github.com/yesnoruly/parcel-start",
+      "description": "Simple starter template for plain web sites."
     }
   ]
 }
